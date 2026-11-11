@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"mime"
 	"os"
 	"path/filepath"
@@ -90,6 +91,9 @@ func ExtractTaxDocumentArchive(encryptionKeyring Keyring, contents []byte, extra
 		storagePath := entryDestination
 		if encrypted {
 			storagePath += ".enc"
+		}
+		if filepath.IsAbs(entry.Name) || strings.Contains(entry.Name, "\\") || !isInsideDirectory(importDirectory, entryDestination) || entry.Mode()&fs.ModeSymlink != 0 {
+			return ExtractedTaxDocumentArchive{}, &ArchiveImportError{Message: "Archive entry name is invalid", StatusCode: 400}
 		}
 		plannedEntries = append(plannedEntries, plannedArchiveEntry{
 			destination: storagePath, contents: storedContents, encrypted: encrypted,
@@ -186,4 +190,9 @@ func discardArchiveAfterWriteFailure(archive ExtractedTaxDocumentArchive, err er
 		return ExtractedTaxDocumentArchive{}, errors.Join(err, discardErr)
 	}
 	return ExtractedTaxDocumentArchive{}, err
+}
+
+func isInsideDirectory(directory, candidatePath string) bool {
+	relativePath, err := filepath.Rel(directory, candidatePath)
+	return err == nil && relativePath != "." && relativePath != ".." && !strings.HasPrefix(relativePath, ".."+string(filepath.Separator))
 }
