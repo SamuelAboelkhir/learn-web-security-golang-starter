@@ -149,7 +149,7 @@ func migrateTaxDocument(ctx context.Context, database *sql.DB, keyring *Keyring,
 		fileMode = sourceInfo.Mode().Perm()
 	}
 
-	stored, valid, err := uploads.StoreDocument(contents, uploadDirectory, keyring)
+	stored, valid, err := uploads.StoreDocument(contents, keyring)
 	if err != nil {
 		return err
 	}

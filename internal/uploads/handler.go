@@ -64,7 +64,7 @@ func (handler *Handler) Upload(responseWriter http.ResponseWriter, request *http
 		handler.renderTaxExemption(responseWriter, request, http.StatusBadRequest, current, "Choose a PDF, JPEG, PNG, or WebP file to upload.")
 		return
 	}
-	document, valid, err := StoreDocument(contents, handler.uploadDirectory, handler.encryptionKeyring)
+	document, valid, err := StoreDocument(contents, handler.encryptionKeyring)
 	if err != nil {
 		handler.internalError(responseWriter, request, err)
 		return
